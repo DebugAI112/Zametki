@@ -1,0 +1,81 @@
+У меня есть датасет complete.csv он содержит следующие столбцы: ID(int), PRODUCT_TYPE(int), TRANS_DTTM(datetime),MCC_CODE(int), LOCATION_NAME(str), AGE(int), GENDER(int), MM_W_CARD(float), MM_IN_BANK(float), EDUCATION_LEVEL(int), TRANS_SUM(float), MARITAL_STATUS(int), DEPENDENT_CNT(int), INCOME_MAIN_AMT(float), REG_CODE(int).
+Твоя задача с помщь библиотек pandas, sckilit-learn, numpy, mathlab и т.п. сделать следующее:
+1. Выполните поиск ключевых слов/биграмм/триграмм в тексте различными способами. Добавьте ключевые слова/биграммы/триграммы, как новые признаки в набор данных. Преобразуй датасет в векторное представление, к которому можно будеть применить численное машинное обучение
+2. Выполните тематическое моделирование различными способами и визуализируйте его результаты.
+
+Для выполнения данной задачи нам понадобятся библиотеки pandas, sklearn, numpy, gensim и matplotlib.
+
+1. Поиск ключевых слов/биграмм/триграмм в тексте различными способами
+
+Начнем с загрузки данных из файла complete.csv:
+
+```python
+import pandas as pd
+
+df = pd.read_csv('complete.csv')
+```
+
+Затем мы можем использовать функцию CountVectorizer из библиотеки sklearn для извлечения ключевых слов/биграмм/триграмм из столбца LOCATION_NAME:
+
+```python
+from sklearn.feature_extraction.text import CountVectorizer
+
+vectorizer = CountVectorizer(ngram_range=(1,3), stop_words='english')
+X = vectorizer.fit_transform(df['LOCATION_NAME'])
+```
+
+Здесь мы указываем, что мы хотим использовать n-граммы длины от 1 до 3, и исключаем английские стоп-слова. Затем мы применяем функцию fit_transform для создания матрицы признаков X, которая будет содержать частоты встречаемости каждого ключевого слова/биграммы/триграммы в каждой строке.
+
+Далее мы можем объединить матрицу признаков X с исходным DataFrame df:
+
+```python
+import numpy as np
+
+X = X.toarray()
+df_new = pd.concat([df, pd.DataFrame(X)], axis=1)
+```
+
+Теперь DataFrame df_new содержит все исходные столбцы, а также новые столбцы, соответствующие каждому ключевому слову/биграмме/триграмме.
+
+2. Тематическое моделирование различными способами и визуализация результатов
+
+Для тематического моделирования мы будем использовать библиотеку gensim. Сначала мы должны преобразовать столбец LOCATION_NAME в список списков слов, чтобы передать его в функцию gensim:
+
+```python
+docs = df['LOCATION_NAME'].apply(lambda x: x.split()).tolist()
+```
+
+Затем мы можем создать словарь и корпус для модели LDA (Latent Dirichlet Allocation):
+
+```python
+from gensim.corpora.dictionary import Dictionary
+from gensim.models.ldamodel import LdaModel
+
+# Создаем словарь
+dictionary = Dictionary(docs)
+
+# Создаем корпус
+corpus = [dictionary.doc2bow(doc) for doc in docs]
+
+# Обучаем модель LDA
+lda_model = LdaModel(corpus=corpus, id2word=dictionary, num_topics=10)
+```
+
+Здесь мы указываем, что мы хотим обучить модель LDA на 10 темах.
+
+Далее мы можем использовать библиотеку pyLDAvis для визуализации результатов моделирования:
+
+```python
+import pyLDAvis.gensim_models as gensimvis
+import pyLDAvis
+
+# Визуализация
+vis = gensimvis.prepare(lda_model, corpus, dictionary)
+pyLDAvis.display(vis)
+ 
+
+Здесь мы используем функцию prepare из библиотеки pyLDAvis, чтобы подготовить данные для визуализации. Затем мы отображаем результаты с помощью функции display.
+
+В итоге мы получаем интерактивную визуализацию, которая позволяет исследовать различные темы, их распределение и связи между ними.
+
+В целом, для выполнения данной задачи мы использовали библиотеки pandas, sklearn, numpy, gensim и matplotlib, чтобы извлечь ключевые слова/биграммы
