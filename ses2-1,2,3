@@ -1,0 +1,113 @@
+У меня есть датасет complete.csv он содержит следующие столбцы: ID(int), PRODUCT_TYPE(int), TRANS_DTTM(datetime),MCC_CODE(int), LOCATION_NAME(str), AGE(int), GENDER(int), MM_W_CARD(float), MM_IN_BANK(float), EDUCATION_LEVEL(int), TRANS_SUM(float), MARITAL_STATUS(int), DEPENDENT_CNT(int), INCOME_MAIN_AMT(float), REG_CODE(int).
+Твоя задача с помщь библиотек pandas, sckilit-learn, numpy, mathlab и т.п. сделать следующее:
+1. Выполните поиск ключевых слов/биграмм/триграмм в тексте различными способами. Добавьте ключевые слова/биграммы/триграммы, как новые признаки в набор данных. Преобразуй датасет в векторное представление, к которому можно будеть применить численное машинное обучение
+2. Выполните тематическое моделирование различными способами и визуализируйте его результаты.
+3. Выполнить кластеризацию данных по сходству компаний несколькими
+способами (не менее трех). Выберите метрику оценки качества кластеризации.
+Обоснуйте выбор методов и приемов. Выполните визуальный анализ кластерных
+структур и оценки качества кластеризации. Определите лучший алгоритм
+кластеризации на основе выбранной метрики.
+Выполни это задание. Напиши код. И аргументируй использование и выявления зависимостей.
+
+Код для выполнения этой задачи может выглядеть следующим образом:
+
+```python
+from sklearn.feature_extraction.text import CountVectorizer
+
+# определяем список ключевых слов/биграмм/триграмм
+keywords = ['ресторан', 'магазин', 'банк', 'кафе', 'транспорт', 'аптека']
+
+# создаем объект CountVectorizer
+cv = CountVectorizer(vocabulary=keywords)
+
+# преобразуем датасет в векторное представление
+X = cv.fit_transform(data.LOCATION_NAME)
+
+# добавляем новые признаки в датасет
+for i, keyword in enumerate(keywords):
+    data[keyword] = X[:, i].toarray().ravel()
+```
+
+2. Тематическое моделирование различными способами и визуализация результатов:
+Для выполнения этой задачи можно использовать модуль LatentDirichletAllocation из библиотеки scikit-
+
+learn. Этот метод позволяет выделить скрытые темы в текстовых данных и определить, какие слова наиболее связаны с каждой темой.
+
+Код для выполнения этой задачи может выглядеть следующим образом:
+
+```python
+from sklearn.decomposition import LatentDirichletAllocation
+import matplotlib.pyplot as plt
+
+# создаем объект LatentDirichletAllocation
+lda = LatentDirichletAllocation(n_components=5, random_state=0)
+
+# преобразуем датасет в векторное представление
+X = cv.fit_transform(data.LOCATION_NAME)
+
+# обучаем модель на данных
+lda.fit(X)
+
+# определяем наиболее связанные слова с каждой темой
+for i, topic in enumerate(lda.components_):
+    print(f"Topic #{i}:")
+    print([cv.get_feature_names()[j] for j in topic.argsort()[:-6:-1]])
+
+# визуализируем результаты
+fig, ax = plt.subplots(figsize=(10, 5))
+ax.bar(range(5), lda.transform(X).mean(axis=0))
+ax.set_xlabel("Topic")
+ax.set_ylabel("Proportion")
+ax.set_title("Topic Proportions")
+plt.show()
+```
+
+3. Кластеризация данных по сходству компаний несколькими способами:
+Для выполнения этой задачи можно использовать различные методы кластеризации, такие как K-means, DBSCAN, Agglomerative Clustering и т.д. Можно использовать метрику Silhouette Score для оценки качества кластеризации. Эта метрика вычисляет среднее значение коэффициента силуэта для всех объектов в кластере и показывает, насколько хорошо объекты в кластере сгруппированы.
+
+Код для выполнения этой задачи может выглядеть следующим образом:
+
+```python
+from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering
+from sklearn.metrics import silhouettescore
+
+# определяем данные для кластеризации
+X = data.drop(["ID", "TRANS_DTTM", "LOCATION_NAME"], axis=1)
+
+# выполняем кластеризацию методом K-means
+kmeans = KMeans(n_clusters=3, random_state=0)
+kmeans_labels = kmeans.fit_predict(X)
+kmeans_score = silhouette_score(X, kmeans_labels)
+
+# выполняем кластеризацию методом DBSCAN
+dbscan = DBSCAN(eps=1, min_samples=10)
+dbscan_labels = dbscan.fit_predict(X)
+dbscan_score = silhouette_score(X, dbscan_labels)
+
+# выполняем кластеризацию методом Agglomerative Clustering
+agg = AgglomerativeClustering(n_clusters=3)
+agg_labels = agg.fit_predict(X)
+agg_score = silhouette_score(X, agg_labels)
+
+# выводим результаты кластеризации и оценки качества
+print("K-means: ", kmeans_score)
+print("DBSCAN: ", dbscan_score)
+print("Agglomerative Clustering: ", agg_score)
+
+# визуализируем результаты кластеризации
+fig, ax = plt.subplots(figsize=(10, 5))
+ax.scatter(X.iloc[:, 0], X.iloc[:, 1], c=kmeans_labels)
+ax.set_xlabel("AGE")
+ax.set_ylabel("TRANS_SUM")
+ax.set_title("K-means Clustering")
+plt.show()
+```
+
+
+
+Обоснование выбора методов и приемов:
+1. Для выполнения задачи поиска ключевых слов/биграмм/триграмм в тексте была использована библиотека scikit-learn, которая предоставляет удобные инструменты для работы с текстовыми данными. Метод CountVectorizer позволяет создать векторное представление датасета и добавить новые признаки на основе ключевых слов/биграмм/триграмм. Это позволяет использовать численное машинное обучение для анализа данных и выявления зависимостей.
+2. Для выполнения задачи тематического моделирования был выбран метод LatentDirichletAllocation из библиотеки scikit-learn. Этот метод позволяет выделить скрытые темы в текстовых данных и определить, какие слова наиболее связаны с каждой темой. Визуализация результатов позволяет наглядно увидеть, какие темы были выделены и какие слова наиболее связаны с каждой темой.
+3. Для выполнения задачи кластеризации данных были выбраны методы K-means, DBSCAN и Agglomerative Clustering из библиотеки scikit-learn. Метрика Silhouette Score была выбрана для оценки качества кластеризации, так как она позволяет определить, насколько хорошо объекты в кластере сгруппированы. Визуализация результатов позволяет наглядно увидеть, как объекты распределены по кластерам и как хорошо они сгруппированы.
+
+Выбор методов и приемов основан на их эффективности и удобстве использования. Библиотека scikit-learn предоставляет широкий набор инструментов для машинного обучения, которые позволяют решать различные задачи, включая поиск ключевых слов/биграмм/триграмм в тексте, тематическое моделирование и кластеризацию данных. Визуализация результатов позволяет наглядно увидеть, какие зависимости есть в данных и как объекты распределены по кластерам.
